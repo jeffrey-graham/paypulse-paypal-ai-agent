@@ -1,0 +1,904 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PayPulse — Agentic Treasury & Autonomous Procurement OS (PayPal AI + AG Grid + Bryntum + APIMatic + Channel3)</title>
+  <!-- AG Grid Community Styles & Script -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ag-grid-community@31.3.2/styles/ag-grid.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ag-grid-community@31.3.2/styles/ag-theme-quartz-dark.css" />
+  <script src="https://cdn.jsdelivr.net/npm/ag-grid-community@31.3.2/dist/ag-grid-community.min.js"></script>
+  <style>
+    :root {
+      --bg-primary: #070b14;
+      --bg-panel: #0f172a;
+      --bg-card: #162038;
+      --border: #263554;
+      --accent-paypal: #0070ba;
+      --accent-cyan: #38bdf8;
+      --accent-green: #22c55e;
+      --accent-amber: #f59e0b;
+      --accent-red: #ef4444;
+      --accent-purple: #a855f7;
+      --text-main: #f1f5f9;
+      --text-muted: #94a3b8;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-main);
+      line-height: 1.5;
+      padding-bottom: 60px;
+    }
+    header {
+      background: linear-gradient(135deg, #091326 0%, #0d2147 60%, #0a1931 100%);
+      border-bottom: 1px solid var(--border);
+      padding: 22px 32px;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+    }
+    .brand-title {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .brand-logo {
+      width: 44px;
+      height: 44px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, #0070ba, #38bdf8);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 20px;
+      color: #fff;
+      box-shadow: 0 4px 16px rgba(56, 189, 248, 0.35);
+    }
+    h1 { font-size: 22px; font-weight: 800; letter-spacing: -0.02em; }
+    .subtitle { font-size: 13px; color: var(--text-muted); }
+    .track-badges {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .badge {
+      font-size: 11px;
+      font-weight: 700;
+      padding: 5px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(56, 189, 248, 0.35);
+      background: rgba(15, 23, 42, 0.8);
+      color: var(--accent-cyan);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    .badge.paypal { border-color: #38bdf8; color: #38bdf8; }
+    .badge.aggrid { border-color: #22c55e; color: #4ade80; }
+    .badge.bryntum { border-color: #a855f7; color: #c084fc; }
+    .badge.apimatic { border-color: #f59e0b; color: #fbbf24; }
+    .badge.channel3 { border-color: #ec4899; color: #f472b6; }
+
+    .container {
+      max-width: 1440px;
+      margin: 24px auto;
+      padding: 0 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+    .kpi-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 16px;
+    }
+    .kpi-card {
+      background: var(--bg-panel);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 18px 20px;
+    }
+    .kpi-label { font-size: 12px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; }
+    .kpi-value { font-size: 26px; font-weight: 800; margin-top: 6px; color: var(--text-main); }
+    .kpi-sub { font-size: 12px; margin-top: 4px; color: var(--accent-green); }
+
+    .grid-2col {
+      display: grid;
+      grid-template-columns: 1.05fr 0.95fr;
+      gap: 20px;
+    }
+    @media (max-width: 1080px) {
+      .grid-2col { grid-template-columns: 1fr; }
+    }
+    .panel {
+      background: var(--bg-panel);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 20px 22px;
+    }
+    .panel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+    }
+    .panel-title { font-size: 16px; font-weight: 700; display: flex; align-items: center; gap: 8px; }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1.5fr 0.8fr 1fr;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+    label { display: block; font-size: 12px; color: var(--text-muted); margin-bottom: 5px; font-weight: 600; }
+    select, input {
+      width: 100%;
+      padding: 9px 12px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text-main);
+      font-size: 13px;
+    }
+    .btn-row { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 12px; }
+    button {
+      cursor: pointer;
+      border: none;
+      border-radius: 8px;
+      padding: 10px 16px;
+      font-size: 13px;
+      font-weight: 700;
+      transition: all 0.15s ease;
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, #0070ba, #0284c7);
+      color: #fff;
+      box-shadow: 0 3px 12px rgba(2, 132, 199, 0.35);
+    }
+    .btn-primary:hover { filter: brightness(1.1); }
+    .btn-warning { background: rgba(245, 158, 11, 0.2); color: #fbbf24; border: 1px solid #f59e0b; }
+    .btn-success { background: rgba(34, 197, 94, 0.2); color: #4ade80; border: 1px solid #22c55e; }
+    .btn-outline { background: var(--bg-card); color: var(--text-main); border: 1px solid var(--border); }
+
+    .quote-list { display: flex; flex-direction: column; gap: 10px; margin-top: 12px; }
+    .quote-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .quote-card.winner { border-color: var(--accent-green); background: rgba(34, 197, 94, 0.08); }
+    .code-box {
+      background: #050811;
+      border: 1px solid #1e293b;
+      border-radius: 10px;
+      padding: 14px;
+      font-family: 'JetBrains Mono', 'Fira Code', monospace;
+      font-size: 12px;
+      color: #93c5fd;
+      max-height: 290px;
+      overflow-y: auto;
+      white-space: pre-wrap;
+    }
+
+    #agGridContainer {
+      width: 100%;
+      height: 340px;
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    /* Bryntum-Style Interactive Timeline & Gantt Scheduler */
+    .bryntum-toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .gantt-wrapper {
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+      background: #0b1120;
+    }
+    .gantt-header, .gantt-row {
+      display: grid;
+      grid-template-columns: 280px 130px 110px 1fr;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+      align-items: center;
+    }
+    .gantt-header {
+      background: #131d35;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      padding: 10px 14px;
+    }
+    .gantt-row {
+      padding: 10px 14px;
+      font-size: 12.5px;
+    }
+    .gantt-row:hover { background: rgba(56, 189, 248, 0.05); }
+    .timeline-track {
+      position: relative;
+      height: 28px;
+      background: rgba(255, 255, 255, 0.03);
+      border-radius: 6px;
+      overflow: hidden;
+    }
+    .timeline-bar {
+      position: absolute;
+      top: 4px;
+      height: 20px;
+      border-radius: 5px;
+      display: flex;
+      align-items: center;
+      padding: 0 8px;
+      font-size: 11px;
+      font-weight: 700;
+      color: #fff;
+      white-space: nowrap;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+    }
+    .status-pill {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 700;
+    }
+    .pill-matched { background: rgba(34, 197, 94, 0.18); color: #4ade80; border: 1px solid #22c55e; }
+    .pill-dispute { background: rgba(239, 68, 68, 0.2); color: #f87171; border: 1px solid #ef4444; }
+    .pill-auth { background: rgba(56, 189, 248, 0.18); color: #38bdf8; border: 1px solid #0284c7; }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="brand-title">
+      <div class="brand-logo">PP</div>
+      <div>
+        <h1>PayPulse — Agentic Treasury & Autonomous Procurement OS</h1>
+        <div class="subtitle">PayPal Orders v2, Invoicing v2 & Payouts API + Channel3 AI Sourcing + APIMatic Typed SDK + AG Grid Ledger + Bryntum Milestone Gantt</div>
+      </div>
+    </div>
+    <div class="track-badges">
+      <span class="badge paypal">PayPal Agentic Commerce</span>
+      <span class="badge aggrid">AG Grid Enterprise Ledger</span>
+      <span class="badge bryntum">Bryntum Milestone Gantt</span>
+      <span class="badge apimatic">APIMatic SDK + Idempotency</span>
+      <span class="badge channel3">Channel3 AI Catalog</span>
+    </div>
+  </header>
+
+  <div class="container">
+    <!-- KPI Row -->
+    <div class="kpi-row">
+      <div class="kpi-card">
+        <div class="kpi-label">Autonomous PO Volume (PayPal v2)</div>
+        <div class="kpi-value" id="kpiTotalVolume">$56,458.00</div>
+        <div class="kpi-sub" id="kpiSavingsSub">+$4,198.00 Channel3 Negotiated Savings</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">AG Grid 3-Way Match Rate</div>
+        <div class="kpi-value" id="kpiMatchRate">80.0%</div>
+        <div class="kpi-sub">PO ↔ Channel3 Quote ↔ PayPal Invoice</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Dispute Holds Protected</div>
+        <div class="kpi-value" id="kpiDisputeVolume" style="color: var(--accent-amber);">$4,150.00</div>
+        <div class="kpi-sub" id="kpiDisputeCount">1 Inflated Invoice Frozen Before Capture</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">APIMatic Idempotency Guard</div>
+        <div class="kpi-value" id="kpiIdempotencyCount">100% Safe</div>
+        <div class="kpi-sub" id="kpiTokenStatus">OAuth2 Token Active • 0 Duplicate Captures</div>
+      </div>
+    </div>
+
+    <!-- Top 2-Col: Channel3 Sourcing + APIMatic SDK Inspector -->
+    <div class="grid-2col">
+      <div class="panel">
+        <div class="panel-header">
+          <div class="panel-title">
+            <span>🛒 Channel3 AI Product Discovery & Autonomous Procurement Sandbox</span>
+          </div>
+          <span class="badge channel3">Best Use of Channel3</span>
+        </div>
+
+        <div class="form-row">
+          <div>
+            <label for="catalogSelect">Channel3 AI Catalog Product SKU</label>
+            <select id="catalogSelect" onchange="refreshChannel3Quotes()">
+              <option value="H100">NVIDIA H100 NVL 94GB PCIe Accelerator ($2,840 base)</option>
+              <option value="GW5">Channel3 Edge AI Industrial Telemetry Gateway v5 ($420 base)</option>
+              <option value="800G">800G OSFP DR8 InfiniBand Optical Transceiver ($680 base)</option>
+            </select>
+          </div>
+          <div>
+            <label for="qtyInput">Order Quantity</label>
+            <input type="number" id="qtyInput" value="10" min="1" max="500" oninput="refreshChannel3Quotes()" />
+          </div>
+          <div>
+            <label for="varianceSelect">Simulated Supplier Invoice</label>
+            <select id="varianceSelect" onchange="refreshChannel3Quotes()">
+              <option value="0.0">Exact 3-Way Match (0.0% Variance → Auto-Capture)</option>
+              <option value="12.3">Inflated Invoice (+12.3% Drift → Freeze Escrow Hold)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="quote-list" id="quoteListContainer"></div>
+
+        <div class="btn-row">
+          <button class="btn-primary" onclick="executeAutonomousOrder()">
+            ⚡ Execute Autonomous PayPal Order v2 + 3-Way Match
+          </button>
+          <button class="btn-warning" onclick="testIdempotentReplay()">
+            🔁 Test APIMatic Idempotent Replay (`PayPal-Request-Id`)
+          </button>
+          <button class="btn-success" onclick="verifyWebhookSignatureDemo()">
+            🔐 Verify PayPal Webhook Signature (CRC32 + HMAC)
+          </button>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header">
+          <div class="panel-title">
+            <span>🛡️ APIMatic Strongly-Typed PayPal SDK & Telemetry Inspector</span>
+          </div>
+          <span class="badge apimatic">Best Use of APIMatic</span>
+        </div>
+        <div class="code-box" id="apimaticInspectorBox"></div>
+      </div>
+    </div>
+
+    <!-- Middle Panel: Live AG Grid Financial Ledger & 3-Way Match Dispute Grid -->
+    <div class="panel">
+      <div class="panel-header">
+        <div class="panel-title">
+          <span>📊 AG Grid Enterprise Financial Ledger & 3-Way Match Dispute Resolution</span>
+        </div>
+        <div style="display: flex; gap: 10px; align-items: center;">
+          <input
+            type="text"
+            id="agQuickFilter"
+            placeholder="Quick filter SKU, vendor, PayPal Order ID..."
+            style="width: 260px;"
+            oninput="onFilterTextBoxChanged()"
+          />
+          <button class="btn-outline" onclick="resolveAllDisputes()">✓ Resolve & Capture Held Escrows</button>
+          <button class="btn-outline" onclick="exportLedgerCsv()">⬇ Export CSV</button>
+          <span class="badge aggrid">Best Use of AG Grid</span>
+        </div>
+      </div>
+      <div id="agGridContainer" class="ag-theme-quartz-dark"></div>
+    </div>
+
+    <!-- Bottom Panel: Live Bryntum-Style Interactive Settlement & Milestone Gantt Scheduler -->
+    <div class="panel">
+      <div class="panel-header">
+        <div class="panel-title">
+          <span>🗓️ Bryntum Settlement Milestone Gantt & Multi-Vendor Escrow Timeline</span>
+        </div>
+        <div style="display: flex; gap: 10px; align-items: center;">
+          <button class="btn-outline" onclick="advanceMilestoneProgress()">⏩ Advance Transit & QA Milestones (+20%)</button>
+          <button class="btn-success" onclick="disburseBatchPayouts()">💸 Execute PayPal Payouts v1 Batch</button>
+          <span class="badge bryntum">Best Use of Bryntum</span>
+        </div>
+      </div>
+
+      <div class="bryntum-toolbar">
+        <div style="font-size: 13px; color: var(--text-muted);">
+          <strong>Critical Path Dependencies:</strong> Finish-to-Start (`M1: 30% Order Auth` ➔ `M2: Carrier Telemetry QA` ➔ `M3: 70% PayPal Capture & Payout Release`)
+        </div>
+        <div id="bryntumSummaryText" style="font-size: 13px; font-weight: 700; color: var(--accent-cyan);"></div>
+      </div>
+
+      <div class="gantt-wrapper">
+        <div class="gantt-header">
+          <div>Milestone Task & Dependency</div>
+          <div>Channel3 Merchant</div>
+          <div>Escrow Tranche</div>
+          <div>Interactive Timeline Window (Nov 10 – Nov 24, 2026)</div>
+        </div>
+        <div id="bryntumRowsContainer"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Channel3 Multi-Merchant Catalog Data
+    const CHANNEL3_CATALOG = {
+      H100: [
+        {
+          quoteId: "CH3-Q-901",
+          productId: "CH3-GPU-H100",
+          productName: "NVIDIA H100 NVL 94GB PCIe Enterprise AI Accelerator",
+          vendorName: "SiliconCloud Direct Corp",
+          vendorEmail: "settlements@siliconcloud.io",
+          sku: "NV-H100-94G-ENT",
+          basePrice: 2840.00,
+          discountPct: 8.5,
+          shippingUsd: 0.00,
+          leadDays: 4,
+          reliability: 98.6,
+          utilityScore: 97.4
+        },
+        {
+          quoteId: "CH3-Q-902",
+          productId: "CH3-GPU-H100",
+          productName: "NVIDIA H100 NVL 94GB PCIe Enterprise AI Accelerator",
+          vendorName: "Apex Compute Wholesale",
+          vendorEmail: "ar-paypal@apexcompute.com",
+          sku: "NV-H100-94G-APX",
+          basePrice: 2950.00,
+          discountPct: 5.0,
+          shippingUsd: 180.00,
+          leadDays: 9,
+          reliability: 91.2,
+          utilityScore: 41.8
+        }
+      ],
+      GW5: [
+        {
+          quoteId: "CH3-Q-903",
+          productId: "CH3-IOT-GW5",
+          productName: "Channel3 Edge AI Industrial Telemetry Gateway v5",
+          vendorName: "NexaGrid Hardware Ltd",
+          vendorEmail: "treasury@nexagrid.ai",
+          sku: "NX-IOT-GW5-PRO",
+          basePrice: 420.00,
+          discountPct: 12.0,
+          shippingUsd: 45.00,
+          leadDays: 3,
+          reliability: 97.4,
+          utilityScore: 96.8
+        },
+        {
+          quoteId: "CH3-Q-904",
+          productId: "CH3-IOT-GW5",
+          productName: "Channel3 Edge AI Industrial Telemetry Gateway v5",
+          vendorName: "Pacific Rim Components",
+          vendorEmail: "billing@pacrim-comp.net",
+          sku: "PR-IOT-GW5-STD",
+          basePrice: 445.00,
+          discountPct: 6.0,
+          shippingUsd: 120.00,
+          leadDays: 11,
+          reliability: 88.5,
+          utilityScore: 39.2
+        }
+      ],
+      "800G": [
+        {
+          quoteId: "CH3-Q-905",
+          productId: "CH3-OPT-800G",
+          productName: "800G OSFP DR8 InfiniBand Optical Transceiver Module",
+          vendorName: "Photonix Interconnect Inc",
+          vendorEmail: "paypal-receivables@photonix.io",
+          sku: "PHX-800G-OSFP",
+          basePrice: 680.00,
+          discountPct: 10.0,
+          shippingUsd: 0.00,
+          leadDays: 2,
+          reliability: 99.1,
+          utilityScore: 98.9
+        }
+      ]
+    };
+
+    let ledgerRows = [
+      {
+        ledger_id: "LDG-1001",
+        paypal_order_id: "ORD-8F92A11C04B2",
+        paypal_request_id: "pp-req-create-order-8f92a11c04b2",
+        vendor_name: "SiliconCloud Direct Corp",
+        sku: "NV-H100-94G-ENT",
+        quantity: 10,
+        po_amount_usd: 25986.00,
+        invoice_amount_usd: 25986.00,
+        variance_pct: 0.00,
+        reconciliation_status: "MATCHED_VERIFIED",
+        paypal_settlement_state: "COMPLETED"
+      },
+      {
+        ledger_id: "LDG-1002",
+        paypal_order_id: "ORD-3D41E98A77C1",
+        paypal_request_id: "pp-req-create-order-3d41e98a77c1",
+        vendor_name: "Photonix Interconnect Inc",
+        sku: "PHX-800G-OSFP",
+        quantity: 40,
+        po_amount_usd: 24480.00,
+        invoice_amount_usd: 24480.00,
+        variance_pct: 0.00,
+        reconciliation_status: "MATCHED_VERIFIED",
+        paypal_settlement_state: "COMPLETED"
+      },
+      {
+        ledger_id: "LDG-1003",
+        paypal_order_id: "ORD-7B19C04E55D8",
+        paypal_request_id: "pp-req-create-order-7b19c04e55d8",
+        vendor_name: "NexaGrid Hardware Ltd",
+        sku: "NX-IOT-GW5-PRO",
+        quantity: 10,
+        po_amount_usd: 3696.00,
+        invoice_amount_usd: 4150.00,
+        variance_pct: 12.28,
+        reconciliation_status: "DISPUTE_HOLD",
+        paypal_settlement_state: "ESCROW_FROZEN_BY_AI"
+      },
+      {
+        ledger_id: "LDG-1004",
+        paypal_order_id: "ORD-5A08F22D19E4",
+        paypal_request_id: "pp-req-create-order-5a08f22d19e4",
+        vendor_name: "SiliconCloud Direct Corp",
+        sku: "NV-H100-94G-ENT",
+        quantity: 2,
+        po_amount_usd: 5680.00,
+        invoice_amount_usd: 5680.00,
+        variance_pct: 0.00,
+        reconciliation_status: "MATCHED_VERIFIED",
+        paypal_settlement_state: "AUTHORIZED_ESCROW"
+      }
+    ];
+
+    let bryntumTasks = [
+      {
+        id: "ORD-8F92A11C04B2-M1",
+        name: "1. Channel3 Quote Lock & 30% Order Auth",
+        vendor: "SiliconCloud Direct Corp",
+        amount: 7795.80,
+        leftPct: 2,
+        widthPct: 18,
+        progress: 100,
+        color: "#0284c7"
+      },
+      {
+        id: "ORD-8F92A11C04B2-M2",
+        name: "2. Carrier Transit & Telemetry QA (FS Dep)",
+        vendor: "SiliconCloud Direct Corp",
+        amount: 0.00,
+        leftPct: 21,
+        widthPct: 34,
+        progress: 100,
+        color: "#8b5cf6"
+      },
+      {
+        id: "ORD-8F92A11C04B2-M3",
+        name: "3. 3-Way Match & 70% PayPal Capture",
+        vendor: "SiliconCloud Direct Corp",
+        amount: 18190.20,
+        leftPct: 56,
+        widthPct: 22,
+        progress: 100,
+        color: "#16a34a"
+      },
+      {
+        id: "ORD-7B19C04E55D8-M1",
+        name: "4. IoT Gateway Escrow Hold (Dispute Freeze)",
+        vendor: "NexaGrid Hardware Ltd",
+        amount: 3696.00,
+        leftPct: 18,
+        widthPct: 45,
+        progress: 40,
+        color: "#ef4444"
+      }
+    ];
+
+    let gridApi = null;
+    let lastRequestId = "pp-req-create-order-8f92a11c04b2";
+
+    function computeUnitPrice(q, qty) {
+      const disc = qty >= 10 ? q.discountPct : (qty >= 5 ? q.discountPct * 0.4 : 0);
+      return +(q.basePrice * (1 - disc / 100)).toFixed(2);
+    }
+
+    function refreshChannel3Quotes() {
+      const key = document.getElementById("catalogSelect").value;
+      const qty = Math.max(1, parseInt(document.getElementById("qtyInput").value || "10", 10));
+      const variancePct = parseFloat(document.getElementById("varianceSelect").value || "0");
+      const quotes = CHANNEL3_CATALOG[key] || [];
+      const container = document.getElementById("quoteListContainer");
+      container.innerHTML = "";
+
+      quotes.forEach((q, idx) => {
+        const unit = computeUnitPrice(q, qty);
+        const subtotal = +(unit * qty).toFixed(2);
+        const savings = +((q.basePrice - unit) * qty).toFixed(2);
+        const div = document.createElement("div");
+        div.className = "quote-card" + (idx === 0 ? " winner" : "");
+        div.innerHTML = `
+          <div>
+            <div style="font-weight: 700; font-size: 13.5px;">
+              ${idx === 0 ? "🏆 Top Ranked: " : ""}${q.vendorName} <span style="color: var(--text-muted); font-weight: 400;">(${q.sku})</span>
+            </div>
+            <div style="font-size: 12px; color: var(--text-muted); margin-top: 2px;">
+              Unit: <strong>$${unit.toFixed(2)}</strong> (Saved $${savings.toLocaleString()}) • SLA: ${q.leadDays}d • Reliability: ${q.reliability}%
+            </div>
+          </div>
+          <div style="text-align: right;">
+            <div style="font-size: 15px; font-weight: 800; color: var(--accent-cyan);">$${subtotal.toLocaleString(undefined, {minimumFractionDigits: 2})}</div>
+            <div style="font-size: 11px; color: var(--accent-green);">Channel3 Utility: ${q.utilityScore}/100</div>
+          </div>
+        `;
+        container.appendChild(div);
+      });
+
+      const best = quotes[0];
+      const unit = computeUnitPrice(best, qty);
+      const subtotal = +(unit * qty).toFixed(2);
+      const billed = +(subtotal * (1 + variancePct / 100)).toFixed(2);
+      lastRequestId = `pp-req-create-order-${best.quoteId.toLowerCase()}-q${qty}`;
+
+      const sdkPreview = {
+        sdk_generator: "APIMatic CodeGen v2.4 (Strict Schema Validation + OAuth2 + Idempotency)",
+        endpoint: "POST https://api-m.sandbox.paypal.com/v2/checkout/orders",
+        headers: {
+          "Authorization": "Bearer A21AA_9f82b0c411e7d63a91c04f88e12a",
+          "PayPal-Request-Id": lastRequestId,
+          "Content-Type": "application/json"
+        },
+        payload: {
+          intent: variancePct > 1.5 ? "AUTHORIZE" : "CAPTURE",
+          purchase_units: [
+            {
+              reference_id: best.quoteId,
+              invoice_id: `PO-CH3-${best.quoteId}-${qty}`,
+              amount: { currency_code: "USD", value: subtotal.toFixed(2) },
+              payee: { email_address: best.vendorEmail }
+            }
+          ]
+        },
+        three_way_match_preview: {
+          channel3_po_usd: subtotal,
+          supplier_invoice_usd: billed,
+          variance_pct: variancePct,
+          agent_decision: variancePct > 1.5 ? "FREEZE_ESCROW_DISPUTE_HOLD" : "AUTO_CAPTURE_AND_SCHEDULE_BRYNTUM"
+        }
+      };
+      document.getElementById("apimaticInspectorBox").textContent = JSON.stringify(sdkPreview, null, 2);
+    }
+
+    function executeAutonomousOrder() {
+      const key = document.getElementById("catalogSelect").value;
+      const qty = Math.max(1, parseInt(document.getElementById("qtyInput").value || "10", 10));
+      const variancePct = parseFloat(document.getElementById("varianceSelect").value || "0");
+      const best = CHANNEL3_CATALOG[key][0];
+      const unit = computeUnitPrice(best, qty);
+      const poAmount = +(unit * qty).toFixed(2);
+      const invAmount = +(poAmount * (1 + variancePct / 100)).toFixed(2);
+      const isDispute = variancePct > 1.5;
+
+      const orderHash = Math.random().toString(16).substring(2, 10).toUpperCase();
+      const orderId = `ORD-${orderHash}`;
+      const reqId = `pp-req-${best.quoteId.toLowerCase()}-${orderHash.toLowerCase()}`;
+      lastRequestId = reqId;
+
+      const newRow = {
+        ledger_id: `LDG-${1000 + ledgerRows.length + 1}`,
+        paypal_order_id: orderId,
+        paypal_request_id: reqId,
+        vendor_name: best.vendorName,
+        sku: best.sku,
+        quantity: qty,
+        po_amount_usd: poAmount,
+        invoice_amount_usd: invAmount,
+        variance_pct: variancePct,
+        reconciliation_status: isDispute ? "DISPUTE_HOLD" : "MATCHED_VERIFIED",
+        paypal_settlement_state: isDispute ? "ESCROW_FROZEN_BY_AI" : "COMPLETED"
+      };
+
+      ledgerRows.unshift(newRow);
+      updateGridAndKpis();
+
+      bryntumTasks.unshift({
+        id: `${orderId}-M1`,
+        name: isDispute
+          ? `⚠️ ${orderId} Escrow Frozen (+${variancePct}% Variance)`
+          : `✅ ${orderId} Autonomous Capture & SLA Window`,
+        vendor: best.vendorName,
+        amount: poAmount,
+        leftPct: 10,
+        widthPct: 52,
+        progress: isDispute ? 25 : 100,
+        color: isDispute ? "#ef4444" : "#16a34a"
+      });
+      renderBryntumTimeline();
+    }
+
+    function testIdempotentReplay() {
+      const replayReport = {
+        apimatic_middleware: "IdempotencyMiddleware.execute_idempotent()",
+        paypal_request_id: lastRequestId,
+        idempotent_replay_detected: true,
+        network_call_suppressed: true,
+        duplicate_capture_prevented: true,
+        status: "200 OK (Returned Cached PayPal Order Snapshot without Double-Charging)"
+      };
+      document.getElementById("apimaticInspectorBox").textContent = JSON.stringify(replayReport, null, 2);
+    }
+
+    function verifyWebhookSignatureDemo() {
+      const webhookReport = {
+        apimatic_webhook_verifier: "APIMaticPayPalClient.verify_webhook_signature()",
+        event_type: "PAYMENT.CAPTURE.COMPLETED",
+        headers_verified: {
+          "PAYPAL-TRANSMISSION-ID": "69cd13f0-d67a-11ef-9912-09a781b2",
+          "PAYPAL-TRANSMISSION-TIME": new Date().toISOString(),
+          "PAYPAL-AUTH-ALGO": "SHA256withRSA / HMAC-SHA256",
+          "crc32_decimal": 3194827104
+        },
+        verification_status: "SUCCESS"
+      };
+      document.getElementById("apimaticInspectorBox").textContent = JSON.stringify(webhookReport, null, 2);
+    }
+
+    function resolveAllDisputes() {
+      ledgerRows.forEach(r => {
+        if (r.reconciliation_status === "DISPUTE_HOLD" || r.paypal_settlement_state === "AUTHORIZED_ESCROW") {
+          r.invoice_amount_usd = r.po_amount_usd;
+          r.variance_pct = 0.0;
+          r.reconciliation_status = "MATCHED_VERIFIED";
+          r.paypal_settlement_state = "COMPLETED";
+        }
+      });
+      updateGridAndKpis();
+    }
+
+    function advanceMilestoneProgress() {
+      bryntumTasks.forEach(t => {
+        t.progress = Math.min(100, t.progress + 20);
+        if (t.progress === 100 && t.color === "#ef4444") {
+          t.color = "#16a34a";
+        }
+      });
+      renderBryntumTimeline();
+    }
+
+    function disburseBatchPayouts() {
+      const batchReport = {
+        endpoint: "POST https://api-m.sandbox.paypal.com/v1/payments/payouts",
+        paypal_request_id: "pp-req-payout-batch-20261110",
+        batch_header: {
+          payout_batch_id: "PAYOUT-99410A2B",
+          batch_status: "SUCCESS",
+          amount: { currency_code: "USD", value: "24310.20" }
+        },
+        items_settled: 2
+      };
+      document.getElementById("apimaticInspectorBox").textContent = JSON.stringify(batchReport, null, 2);
+      advanceMilestoneProgress();
+    }
+
+    function renderBryntumTimeline() {
+      const container = document.getElementById("bryntumRowsContainer");
+      container.innerHTML = "";
+      let totalEscrow = 0;
+      bryntumTasks.forEach(t => {
+        totalEscrow += t.amount;
+        const row = document.createElement("div");
+        row.className = "gantt-row";
+        row.innerHTML = `
+          <div style="font-weight: 600;">${t.name}</div>
+          <div style="color: var(--text-muted);">${t.vendor}</div>
+          <div style="font-weight: 700; color: var(--accent-cyan);">$${t.amount.toLocaleString(undefined, {minimumFractionDigits: 2})}</div>
+          <div class="timeline-track">
+            <div class="timeline-bar" style="left: ${t.leftPct}%; width: ${t.widthPct}%; background: ${t.color};">
+              ${t.progress}% Complete
+            </div>
+          </div>
+        `;
+        container.appendChild(row);
+      });
+      document.getElementById("bryntumSummaryText").textContent =
+        `${bryntumTasks.length} Active Milestones • $${totalEscrow.toLocaleString(undefined, {minimumFractionDigits: 2})} Scheduled Liquidity`;
+    }
+
+    function updateGridAndKpis() {
+      if (gridApi) {
+        gridApi.setGridOption("rowData", [...ledgerRows]);
+      }
+      const totalVol = ledgerRows.reduce((acc, r) => acc + r.po_amount_usd, 0);
+      const matchedCount = ledgerRows.filter(r => r.reconciliation_status === "MATCHED_VERIFIED").length;
+      const disputes = ledgerRows.filter(r => r.reconciliation_status === "DISPUTE_HOLD");
+      const disputeVol = disputes.reduce((acc, r) => acc + r.invoice_amount_usd, 0);
+
+      document.getElementById("kpiTotalVolume").textContent =
+        "$" + totalVol.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      document.getElementById("kpiMatchRate").textContent =
+        ((matchedCount / Math.max(1, ledgerRows.length)) * 100).toFixed(1) + "%";
+      document.getElementById("kpiDisputeVolume").textContent =
+        "$" + disputeVol.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      document.getElementById("kpiDisputeCount").textContent =
+        `${disputes.length} Inflated Invoice(s) Frozen Before Capture`;
+    }
+
+    function onFilterTextBoxChanged() {
+      const val = document.getElementById("agQuickFilter").value;
+      if (gridApi) {
+        gridApi.setGridOption("quickFilterText", val);
+      }
+    }
+
+    function exportLedgerCsv() {
+      if (gridApi) {
+        gridApi.exportDataAsCsv({ fileName: "paypulse_ag_grid_ledger.csv" });
+      }
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+      refreshChannel3Quotes();
+      renderBryntumTimeline();
+
+      const columnDefs = [
+        { field: "ledger_id", headerName: "Ledger ID", width: 115, pinned: "left" },
+        { field: "paypal_order_id", headerName: "PayPal Order ID", width: 165 },
+        { field: "paypal_request_id", headerName: "APIMatic Request-Id", width: 230 },
+        { field: "vendor_name", headerName: "Channel3 Merchant", flex: 1, minWidth: 180 },
+        { field: "sku", headerName: "SKU", width: 150 },
+        {
+          field: "po_amount_usd",
+          headerName: "PO Amount ($)",
+          width: 135,
+          valueFormatter: p => "$" + Number(p.value).toLocaleString(undefined, { minimumFractionDigits: 2 })
+        },
+        {
+          field: "invoice_amount_usd",
+          headerName: "Billed Invoice ($)",
+          width: 145,
+          valueFormatter: p => "$" + Number(p.value).toLocaleString(undefined, { minimumFractionDigits: 2 })
+        },
+        {
+          field: "variance_pct",
+          headerName: "Variance",
+          width: 110,
+          valueFormatter: p => Number(p.value).toFixed(2) + "%"
+        },
+        {
+          field: "reconciliation_status",
+          headerName: "3-Way Match",
+          width: 165,
+          cellRenderer: p => {
+            const cls = p.value === "MATCHED_VERIFIED" ? "pill-matched" : "pill-dispute";
+            return `<span class="status-pill ${cls}">${p.value}</span>`;
+          }
+        },
+        {
+          field: "paypal_settlement_state",
+          headerName: "PayPal State",
+          width: 175,
+          cellRenderer: p => {
+            const cls = p.value === "COMPLETED" ? "pill-matched" : (p.value === "ESCROW_FROZEN_BY_AI" ? "pill-dispute" : "pill-auth");
+            return `<span class="status-pill ${cls}">${p.value}</span>`;
+          }
+        }
+      ];
+
+      const gridDiv = document.getElementById("agGridContainer");
+      if (window.agGrid && window.agGrid.createGrid) {
+        gridApi = window.agGrid.createGrid(gridDiv, {
+          columnDefs,
+          rowData: ledgerRows,
+          defaultColDef: { sortable: true, filter: true, resizable: true },
+          animateRows: true
+        });
+      }
+      updateGridAndKpis();
+    });
+  </script>
+</body>
+</html>
