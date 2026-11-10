@@ -24,12 +24,12 @@ PayPulse is a unified B2B procurement and treasury operating system connecting P
 
 ## 🔍 Sandbox Simulation vs. Live PayPal REST Mode
 
-To let judges evaluate PayPulse immediately without managing API secrets while supporting full end-to-end PayPal Sandbox execution, PayPulse provides two transparent execution modes:
+To let judges evaluate PayPulse immediately without managing API secrets, PayPulse separates its zero-credential simulation from its implemented PayPal REST HTTP client:
 
 - **Static Browser Command Center (`index.html` on GitHub Pages):** Runs a **zero-credential deterministic client-side simulation** with real **AG Grid Community v31.3.2** rendering/CSV export and interactive **Bryntum `ProjectModel` JSON** generation/export. No PayPal client secrets are embedded in client-side JavaScript.
-- **Python SDK & Treasury Engine (`src/apimatic_paypal_sdk.py` + `src/paypulse_engine.py`):** Supports dual-mode transport (`mode="auto" | "live" | "deterministic_sandbox"`):
-  - **Deterministic Offline Mode (default when env vars are unset):** Runs reproducible local Order/Invoice/Payout/Webhook state transitions (`transport_mode: "deterministic_sandbox"`) for offline CI and unit testing.
-  - **Live PayPal REST Mode (`mode="live"` or when `PAYPAL_CLIENT_ID` + `PAYPAL_CLIENT_SECRET` are set):** Exchanges OAuth 2.0 Client Credentials against `https://api-m.sandbox.paypal.com/v1/oauth2/token` (or live `https://api-m.paypal.com`) and executes real HTTPS requests for Orders v2, Invoicing v2, Payouts v1, and Webhook Verification via stdlib `urllib.request` with `RetryPolicy` exponential backoff (`transport_mode: "live_paypal_rest"`).
+- **Python SDK & Treasury Engine (`src/apimatic_paypal_sdk.py` + `src/paypulse_engine.py`):** Implements dual-mode transport (`mode="auto" | "live" | "deterministic_sandbox"`):
+  - **Deterministic Offline Mode (default when env vars are unset — exercised in CI & unit tests):** Runs reproducible local Order/Invoice/Payout/Webhook state transitions (`transport_mode: "deterministic_sandbox"`).
+  - **Live PayPal Sandbox REST Mode (`mode="live"` when `PAYPAL_CLIENT_ID` + `PAYPAL_CLIENT_SECRET` are provided — HTTP transport implemented and unit-tested via injected transport in `tests/test_paypulse.py`; not yet exercised end-to-end against live `api-m.sandbox.paypal.com` credentials):** Exchanges OAuth 2.0 Client Credentials at `/v1/oauth2/token` and dispatches HTTPS requests for Orders v2, Invoicing v2, Payouts v1, and Webhook Verification via stdlib `urllib.request` with `RetryPolicy` exponential backoff (`transport_mode: "live_paypal_rest"`).
 
 ---
 

@@ -311,11 +311,9 @@
     <!-- Architecture & Sandbox Mode Transparency Banner -->
     <div class="disclosure-banner">
       <div>
-        <strong>🔍 Interactive Browser Sandbox &amp; Live PayPal REST Architecture:</strong>
+        <strong>🔍 Interactive Browser Sandbox &amp; PayPal REST SDK Disclosure:</strong>
         This static GitHub Pages Command Center runs a <strong>zero-credential deterministic browser simulation</strong> so judges can test Channel3 quote ranking, 3-way match dispute freezes, APIMatic <code>PayPal-Request-Id</code> idempotency, real <strong>AG Grid Community v31.3.2</strong> filtering/CSV export, and <strong>Bryntum Gantt <code>ProjectModel</code> JSON</strong> milestone scheduling immediately.
-        For live <code>https://api-m.sandbox.paypal.com</code> OAuth2 + Orders v2 / Invoicing v2 / Payouts v1 HTTP execution, run
-        <code>PAYPAL_CLIENT_ID=... PAYPAL_CLIENT_SECRET=... PYTHONPATH=. python3 -m src.paypulse_engine --mode live</code> from
-        <a href="https://github.com/jeffrey-graham/paypulse-paypal-ai-agent" target="_blank" rel="noopener">github.com/jeffrey-graham/paypulse-paypal-ai-agent</a>.
+        In Python (<a href="https://github.com/jeffrey-graham/paypulse-paypal-ai-agent" target="_blank" rel="noopener">github.com/jeffrey-graham/paypulse-paypal-ai-agent</a>), <code>src/apimatic_paypal_sdk.py</code> implements both deterministic offline mode and a stdlib <code>urllib</code> PayPal Sandbox REST transport (unit-tested via mock HTTP transport; supply your own PayPal Developer Sandbox <code>PAYPAL_CLIENT_ID</code> &amp; <code>PAYPAL_CLIENT_SECRET</code> with <code>--mode live</code> to exercise against <code>api-m.sandbox.paypal.com</code>).
       </div>
       <details class="media-drawer">
         <summary>▶ Watch Embedded 1080p Walkthrough Video &amp; View System Architecture Diagram</summary>

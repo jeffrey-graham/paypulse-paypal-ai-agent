@@ -40,7 +40,7 @@ We built **PayPulse** to bridge that exact gap: an end-to-end Agentic Treasury &
 ---
 
 ## 🏆 Sponsor Track Qualification Summary
-- **Main Track (Best PayPal + AI & Best Agentic Commerce):** Full MCP/Function-Calling tool suite orchestrating PayPal Orders v2, Invoicing v2, Payouts v1, and cryptographic webhook verification (`mode="live"` HTTPS against `api-m.sandbox.paypal.com` via `PAYPAL_CLIENT_ID`/`SECRET` + deterministic zero-credential sandbox fallback).
+- **Main Track (Best PayPal + AI & Best Agentic Commerce):** Full MCP/Function-Calling tool suite orchestrating PayPal Orders v2, Invoicing v2, Payouts v1, and cryptographic webhook verification (deterministic zero-credential sandbox + stdlib `urllib` live Sandbox REST mode implemented and unit-tested via mock transport; supply PayPal Developer Sandbox `PAYPAL_CLIENT_ID`/`SECRET` to run against `api-m.sandbox.paypal.com`).
 - **Best Use of AG Grid:** Live interactive AG Grid Community v31.3.2 financial ledger with custom status & variance cell renderers, quick-search filtering, column sorting, one-click dispute resolution, and CSV export.
 - **Best Use of APIMatic:** Strongly-typed SDK architecture with pre-flight schema validation, OAuth2 token lifecycle management, exponential backoff retry policy (`408/429/5xx`), and canonical-JSON `PayPal-Request-Id` idempotency replay protection.
 - **Best Use of Bryntum:** Structured Bryntum Gantt `ProjectModel` JSON generator (`tasks` + Finish-to-Start `dependencies`) paired with an interactive milestone Gantt timeline and 1-click JSON export.
