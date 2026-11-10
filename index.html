@@ -262,6 +262,30 @@
     .pill-matched { background: rgba(34, 197, 94, 0.18); color: #4ade80; border: 1px solid #22c55e; }
     .pill-dispute { background: rgba(239, 68, 68, 0.2); color: #f87171; border: 1px solid #ef4444; }
     .pill-auth { background: rgba(56, 189, 248, 0.18); color: #38bdf8; border: 1px solid #0284c7; }
+    .disclosure-banner {
+      background: rgba(14, 116, 144, 0.14);
+      border: 1px solid rgba(56, 189, 248, 0.4);
+      border-radius: 12px;
+      padding: 14px 18px;
+      font-size: 12.5px;
+      color: #e2e8f0;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .disclosure-banner a {
+      color: var(--accent-cyan);
+      font-weight: 600;
+      text-decoration: none;
+    }
+    .disclosure-banner a:hover { text-decoration: underline; }
+    details.media-drawer summary {
+      cursor: pointer;
+      font-weight: 700;
+      color: var(--accent-cyan);
+      font-size: 12.5px;
+      user-select: none;
+    }
   </style>
 </head>
 <body>
@@ -271,19 +295,42 @@
       <div class="brand-logo">PP</div>
       <div>
         <h1>PayPulse — Agentic Treasury & Autonomous Procurement OS</h1>
-        <div class="subtitle">PayPal Orders v2, Invoicing v2 & Payouts API + Channel3 AI Sourcing + APIMatic Typed SDK + AG Grid Ledger + Bryntum Milestone Gantt</div>
+        <div class="subtitle">PayPal Orders v2, Invoicing v2 & Payouts API + Channel3 AI Sourcing + APIMatic Typed SDK + AG Grid v31 Ledger + Bryntum ProjectModel Gantt</div>
       </div>
     </div>
     <div class="track-badges">
       <span class="badge paypal">PayPal Agentic Commerce</span>
-      <span class="badge aggrid">AG Grid Enterprise Ledger</span>
-      <span class="badge bryntum">Bryntum Milestone Gantt</span>
+      <span class="badge aggrid">AG Grid v31 Financial Ledger</span>
+      <span class="badge bryntum">Bryntum ProjectModel Gantt</span>
       <span class="badge apimatic">APIMatic SDK + Idempotency</span>
       <span class="badge channel3">Channel3 AI Catalog</span>
     </div>
   </header>
 
   <div class="container">
+    <!-- Architecture & Sandbox Mode Transparency Banner -->
+    <div class="disclosure-banner">
+      <div>
+        <strong>🔍 Interactive Browser Sandbox &amp; Live PayPal REST Architecture:</strong>
+        This static GitHub Pages Command Center runs a <strong>zero-credential deterministic browser simulation</strong> so judges can test Channel3 quote ranking, 3-way match dispute freezes, APIMatic <code>PayPal-Request-Id</code> idempotency, real <strong>AG Grid Community v31.3.2</strong> filtering/CSV export, and <strong>Bryntum Gantt <code>ProjectModel</code> JSON</strong> milestone scheduling immediately.
+        For live <code>https://api-m.sandbox.paypal.com</code> OAuth2 + Orders v2 / Invoicing v2 / Payouts v1 HTTP execution, run
+        <code>PAYPAL_CLIENT_ID=... PAYPAL_CLIENT_SECRET=... PYTHONPATH=. python3 -m src.paypulse_engine --mode live</code> from
+        <a href="https://github.com/jeffrey-graham/paypulse-paypal-ai-agent" target="_blank" rel="noopener">github.com/jeffrey-graham/paypulse-paypal-ai-agent</a>.
+      </div>
+      <details class="media-drawer">
+        <summary>▶ Watch Embedded 1080p Walkthrough Video &amp; View System Architecture Diagram</summary>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px; margin-top: 12px; align-items: start;">
+          <div>
+            <video controls preload="none" style="width: 100%; border-radius: 8px; border: 1px solid var(--border); background: #000;">
+              <source src="assets/paypal_ai_demo.mp4" type="video/mp4" />
+            </video>
+          </div>
+          <div>
+            <img src="assets/architecture.png" alt="PayPulse System Architecture" loading="lazy" style="width: 100%; border-radius: 8px; border: 1px solid var(--border);" />
+          </div>
+        </div>
+      </details>
+    </div>
     <!-- KPI Row -->
     <div class="kpi-row">
       <div class="kpi-card">
@@ -370,9 +417,9 @@
     <div class="panel">
       <div class="panel-header">
         <div class="panel-title">
-          <span>📊 AG Grid Enterprise Financial Ledger & 3-Way Match Dispute Resolution</span>
+          <span>📊 AG Grid v31 Financial Ledger &amp; 3-Way Match Dispute Resolution</span>
         </div>
-        <div style="display: flex; gap: 10px; align-items: center;">
+        <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
           <input
             type="text"
             id="agQuickFilter"
@@ -380,24 +427,25 @@
             style="width: 260px;"
             oninput="onFilterTextBoxChanged()"
           />
-          <button class="btn-outline" onclick="resolveAllDisputes()">✓ Resolve & Capture Held Escrows</button>
+          <button class="btn-outline" onclick="resolveAllDisputes()">✓ Resolve &amp; Capture Held Escrows</button>
           <button class="btn-outline" onclick="exportLedgerCsv()">⬇ Export CSV</button>
-          <span class="badge aggrid">Best Use of AG Grid</span>
+          <span class="badge aggrid">AG Grid Community v31.3.2</span>
         </div>
       </div>
       <div id="agGridContainer" class="ag-theme-quartz-dark"></div>
     </div>
 
-    <!-- Bottom Panel: Live Bryntum-Style Interactive Settlement & Milestone Gantt Scheduler -->
+    <!-- Bottom Panel: Bryntum ProjectModel Interactive Settlement & Milestone Gantt Scheduler -->
     <div class="panel">
       <div class="panel-header">
         <div class="panel-title">
-          <span>🗓️ Bryntum Settlement Milestone Gantt & Multi-Vendor Escrow Timeline</span>
+          <span>🗓️ Bryntum ProjectModel Settlement Gantt &amp; Multi-Vendor Escrow Timeline</span>
         </div>
-        <div style="display: flex; gap: 10px; align-items: center;">
-          <button class="btn-outline" onclick="advanceMilestoneProgress()">⏩ Advance Transit & QA Milestones (+20%)</button>
+        <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+          <button class="btn-outline" onclick="advanceMilestoneProgress()">⏩ Advance Transit &amp; QA Milestones (+20%)</button>
+          <button class="btn-outline" onclick="exportBryntumProjectModelJson()">⬇ Export Bryntum ProjectModel JSON</button>
           <button class="btn-success" onclick="disburseBatchPayouts()">💸 Execute PayPal Payouts v1 Batch</button>
-          <span class="badge bryntum">Best Use of Bryntum</span>
+          <span class="badge bryntum">Bryntum ProjectModel Schema</span>
         </div>
       </div>
 
@@ -673,6 +721,12 @@
       document.getElementById("apimaticInspectorBox").textContent = JSON.stringify(sdkPreview, null, 2);
     }
 
+    const idempotencyCache = new Map([
+      ["pp-req-create-order-8f92a11c04b2", { orderId: "ORD-8F92A11C04B2", status: "COMPLETED", amountUsd: 25986.00 }]
+    ]);
+    let blockedReplays = 0;
+    let negotiatedSavingsUsd = 4198.00;
+
     function executeAutonomousOrder() {
       const key = document.getElementById("catalogSelect").value;
       const qty = Math.max(1, parseInt(document.getElementById("qtyInput").value || "10", 10));
@@ -680,6 +734,7 @@
       const best = CHANNEL3_CATALOG[key][0];
       const unit = computeUnitPrice(best, qty);
       const poAmount = +(unit * qty).toFixed(2);
+      const savedOnOrder = +((best.basePrice - unit) * qty).toFixed(2);
       const invAmount = +(poAmount * (1 + variancePct / 100)).toFixed(2);
       const isDispute = variancePct > 1.5;
 
@@ -687,6 +742,7 @@
       const orderId = `ORD-${orderHash}`;
       const reqId = `pp-req-${best.quoteId.toLowerCase()}-${orderHash.toLowerCase()}`;
       lastRequestId = reqId;
+      negotiatedSavingsUsd = +(negotiatedSavingsUsd + savedOnOrder).toFixed(2);
 
       const newRow = {
         ledger_id: `LDG-${1000 + ledgerRows.length + 1}`,
@@ -702,6 +758,13 @@
         paypal_settlement_state: isDispute ? "ESCROW_FROZEN_BY_AI" : "COMPLETED"
       };
 
+      idempotencyCache.set(reqId, {
+        orderId,
+        status: newRow.paypal_settlement_state,
+        amountUsd: poAmount,
+        sku: best.sku
+      });
+
       ledgerRows.unshift(newRow);
       updateGridAndKpis();
 
@@ -712,24 +775,105 @@
           : `✅ ${orderId} Autonomous Capture & SLA Window`,
         vendor: best.vendorName,
         amount: poAmount,
+        startDate: "2026-11-10",
+        endDate: "2026-11-15",
+        durationDays: best.leadDays + 1,
         leftPct: 10,
         widthPct: 52,
         progress: isDispute ? 25 : 100,
         color: isDispute ? "#ef4444" : "#16a34a"
       });
       renderBryntumTimeline();
+      document.getElementById("apimaticInspectorBox").textContent = JSON.stringify({
+        apimatic_sdk_execution: "APIMaticPayPalClient.create_order() -> AGGridLedgerReconciler.record_and_reconcile()",
+        transport_mode: "deterministic_browser_sandbox",
+        paypal_order_id: orderId,
+        paypal_request_id: reqId,
+        reconciliation_status: newRow.reconciliation_status,
+        paypal_settlement_state: newRow.paypal_settlement_state,
+        po_amount_usd: poAmount,
+        invoice_amount_usd: invAmount
+      }, null, 2);
     }
 
     function testIdempotentReplay() {
+      blockedReplays += 1;
+      const cached = idempotencyCache.get(lastRequestId) || {
+        orderId: "ORD-8F92A11C04B2",
+        status: "COMPLETED",
+        amountUsd: 25986.00
+      };
       const replayReport = {
         apimatic_middleware: "IdempotencyMiddleware.execute_idempotent()",
         paypal_request_id: lastRequestId,
         idempotent_replay_detected: true,
+        cached_snapshot: cached,
         network_call_suppressed: true,
         duplicate_capture_prevented: true,
+        total_replays_blocked_in_session: blockedReplays,
         status: "200 OK (Returned Cached PayPal Order Snapshot without Double-Charging)"
       };
       document.getElementById("apimaticInspectorBox").textContent = JSON.stringify(replayReport, null, 2);
+      document.getElementById("kpiTokenStatus").textContent =
+        `OAuth2 Token Active • ${blockedReplays} Duplicate Capture Replay(s) Blocked`;
+    }
+
+    function buildBryntumProjectModel() {
+      const taskRows = bryntumTasks.map((t, idx) => ({
+        id: t.id,
+        name: t.name,
+        vendor: t.vendor,
+        startDate: t.startDate || "2026-11-10",
+        duration: t.durationDays || 4,
+        durationUnit: "day",
+        percentDone: t.progress,
+        amountUsd: t.amount,
+        index: idx
+      }));
+      const depRows = [];
+      for (let i = 0; i + 1 < taskRows.length; i++) {
+        const curPrefix = taskRows[i].id.split("-M")[0];
+        const nextPrefix = taskRows[i + 1].id.split("-M")[0];
+        if (curPrefix === nextPrefix) {
+          depRows.push({
+            id: `DEP-${taskRows[i].id}-${taskRows[i + 1].id}`,
+            fromTask: taskRows[i].id,
+            toTask: taskRows[i + 1].id,
+            type: 2,
+            typeLabel: "FinishToStart"
+          });
+        }
+      }
+      const totalLiquidity = +taskRows.reduce((s, r) => s + r.amountUsd, 0).toFixed(2);
+      return {
+        project: {
+          calendar: "general",
+          startDate: "2026-11-10",
+          hoursPerDay: 24,
+          daysPerWeek: 7
+        },
+        tasks: { rows: taskRows },
+        dependencies: { rows: depRows },
+        treasury_summary: {
+          total_scheduled_milestones: taskRows.length,
+          total_committed_liquidity_usd: totalLiquidity
+        }
+      };
+    }
+
+    function exportBryntumProjectModelJson() {
+      const model = buildBryntumProjectModel();
+      const jsonText = JSON.stringify(model, null, 2);
+      document.getElementById("apimaticInspectorBox").textContent = jsonText;
+      const blob = new Blob([jsonText], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "paypulse_bryntum_project_model.json";
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
     }
 
     function verifyWebhookSignatureDemo() {
@@ -819,6 +963,8 @@
 
       document.getElementById("kpiTotalVolume").textContent =
         "$" + totalVol.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      document.getElementById("kpiSavingsSub").textContent =
+        `+$${negotiatedSavingsUsd.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} Channel3 Negotiated Savings`;
       document.getElementById("kpiMatchRate").textContent =
         ((matchedCount / Math.max(1, ledgerRows.length)) * 100).toFixed(1) + "%";
       document.getElementById("kpiDisputeVolume").textContent =

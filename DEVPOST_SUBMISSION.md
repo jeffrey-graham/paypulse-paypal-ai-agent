@@ -27,12 +27,12 @@ We built **PayPulse** to bridge that exact gap: an end-to-end Agentic Treasury &
    - Wraps **PayPal Orders v2** (`/v2/checkout/orders`, `/authorize`, `/capture`), **Invoicing v2** (`/v2/invoicing/invoices`), and **Payouts v1** (`/v1/payments/payouts`) inside strongly-typed OpenAPI schema validators (`Money`, `OrderItem`, `PurchaseUnitRequest`, `OrderRequest`, `InvoiceDraftRequest`, `PayoutBatchRequest`).
    - Enforces automatic OAuth 2.0 `/v1/oauth2/token` lifecycle caching and deterministic **`PayPal-Request-Id` Idempotency Middleware** (`IdempotencyMiddleware`) that suppresses duplicate captures on network retries and raises immediate schema conflict alerts if a request ID is reused with a mutated payload.
    - Verifies incoming PayPal webhooks via cryptographic **CRC32 + HMAC-SHA256** signature validation.
-3. **AG Grid Enterprise Financial Ledger & 3-Way Match Dispute Engine (`AGGridLedgerReconciler`)**:
+3. **AG Grid v31 Financial Ledger & 3-Way Match Dispute Engine (`AGGridLedgerReconciler`)**:
    - Performs automated 3-way matching across the **Channel3 Purchase Order**, **Supplier Invoice**, and **PayPal Settlement State**.
    - If invoice variance is `<= 1.5%`, PayPulse automatically captures the PayPal order (`COMPLETED`).
-   - If a supplier submits an inflated invoice (`> 1.5%` variance), PayPulse immediately freezes the transaction in **`DISPUTE_HOLD` (`ESCROW_FROZEN_BY_AI`)** inside the live **AG Grid** command center, allowing finance operators to filter, inspect, export CSVs, or resolve disputes in one click.
-4. **Bryntum Settlement Milestone Gantt Scheduler (`BryntumSettlementScheduler`)**:
-   - Automatically generates a 3-stage **Finish-to-Start (`FS`)** milestone dependency graph for every procurement order:
+   - If a supplier submits an inflated invoice (`> 1.5%` variance), PayPulse immediately freezes the transaction in **`DISPUTE_HOLD` (`ESCROW_FROZEN_BY_AI`)** inside the live **AG Grid Community v31.3.2** command center, allowing finance operators to filter, inspect, export CSVs, or resolve disputes in one click.
+4. **Bryntum `ProjectModel` Settlement Milestone Gantt Scheduler (`BryntumSettlementScheduler`)**:
+   - Automatically generates a structured Bryntum Gantt `ProjectModel` JSON (`project`, `tasks.rows`, and 3-stage **Finish-to-Start (`FS`)** `dependencies.rows`) for every procurement order, rendered in an embedded zero-license-wall browser timeline with 1-click `ProjectModel` JSON export:
      - `M1`: Channel3 Quote Lock & 30% PayPal Order Authorization Deposit
      - `M2`: Carrier Transit & Telemetry QA Inspection Window
      - `M3`: 3-Way Match Verification & 70% PayPal Capture / Payouts v1 Batch Release
@@ -40,8 +40,8 @@ We built **PayPulse** to bridge that exact gap: an end-to-end Agentic Treasury &
 ---
 
 ## 🏆 Sponsor Track Qualification Summary
-- **Main Track (Best PayPal + AI & Best Agentic Commerce):** Full MCP/Function-Calling tool suite orchestrating PayPal Orders v2, Invoicing v2, Payouts v1, and cryptographic webhook verification with autonomous 3-way match guardrails.
-- **Best Use of AG Grid:** Live interactive AG Grid Community/Enterprise financial ledger with custom status & variance cell renderers, quick-search filtering, column sorting, one-click dispute resolution, and CSV export.
-- **Best Use of APIMatic:** Strongly-typed SDK architecture with pre-flight schema validation, OAuth2 token lifecycle management, exponential backoff retry policy, and `PayPal-Request-Id` idempotency replay protection.
-- **Best Use of Bryntum:** Interactive milestone Gantt scheduler and project dependency engine tracking Finish-to-Start procurement stages, critical path duration, and committed treasury liquidity.
+- **Main Track (Best PayPal + AI & Best Agentic Commerce):** Full MCP/Function-Calling tool suite orchestrating PayPal Orders v2, Invoicing v2, Payouts v1, and cryptographic webhook verification (`mode="live"` HTTPS against `api-m.sandbox.paypal.com` via `PAYPAL_CLIENT_ID`/`SECRET` + deterministic zero-credential sandbox fallback).
+- **Best Use of AG Grid:** Live interactive AG Grid Community v31.3.2 financial ledger with custom status & variance cell renderers, quick-search filtering, column sorting, one-click dispute resolution, and CSV export.
+- **Best Use of APIMatic:** Strongly-typed SDK architecture with pre-flight schema validation, OAuth2 token lifecycle management, exponential backoff retry policy (`408/429/5xx`), and canonical-JSON `PayPal-Request-Id` idempotency replay protection.
+- **Best Use of Bryntum:** Structured Bryntum Gantt `ProjectModel` JSON generator (`tasks` + Finish-to-Start `dependencies`) paired with an interactive milestone Gantt timeline and 1-click JSON export.
 - **Best Use of Channel3:** Multi-merchant AI product discovery and unit-economics price intelligence engine that negotiates volume discounts ($2,414 saved on a single 10x H100 order) and feeds directly into PayPal Order creation.

@@ -5,9 +5,13 @@ Compatible with both `python3 -m unittest discover -s tests -v` and `pytest`.
 
 from __future__ import annotations
 
+import base64
+import json
 import unittest
+from typing import Any, Dict, List, Optional, Tuple
 
 from src.apimatic_paypal_sdk import (
+    APIMaticHTTPError,
     APIMaticPayPalClient,
     APIMaticSchemaValidationError,
     Money,
@@ -15,8 +19,10 @@ from src.apimatic_paypal_sdk import (
     OrderItem,
     OrderRequest,
     PurchaseUnitRequest,
+    RetryPolicy,
+    canonical_json_fingerprint,
 )
-from src.paypulse_engine import PayPulseAgenticTreasury
+from src.paypulse_engine import PayPulseAgenticTreasury, run_cli_demo
 
 
 class TestPayPulseAgenticTreasury(unittest.TestCase):
@@ -46,7 +52,7 @@ class TestPayPulseAgenticTreasury(unittest.TestCase):
 
     def test_02_apimatic_oauth2_token_lifecycle_and_refresh(self) -> None:
         fake_time = [1000.0]
-        mgr = OAuth2TokenManager("cid_123", "sec_456", clock=lambda: fake_time[0])
+        mgr = OAuth2TokenManager("cid_123", "sec_456", clock=lambda: fake_time[0], live_http=False)
         t1 = mgr.get_bearer_token()
         self.assertTrue(t1.startswith("A21AA_"))
         self.assertEqual(mgr.refresh_count, 1)
@@ -62,7 +68,7 @@ class TestPayPulseAgenticTreasury(unittest.TestCase):
         self.assertEqual(mgr.refresh_count, 2)
 
     def test_03_apimatic_idempotency_replay_and_conflict_guard(self) -> None:
-        client = APIMaticPayPalClient()
+        client = APIMaticPayPalClient(mode="deterministic_sandbox")
         item = OrderItem("Optic Transceiver", "PHX-800G", 5, Money("USD", "680.00"))
         pu = PurchaseUnitRequest(
             reference_id="Q-905",
@@ -91,10 +97,13 @@ class TestPayPulseAgenticTreasury(unittest.TestCase):
             items=[OrderItem("Optic Transceiver", "PHX-800G", 10, Money("USD", "680.00"))],
         )
         with self.assertRaisesRegex(APIMaticSchemaValidationError, "Idempotency conflict"):
-            client.create_order(OrderRequest(intent="CAPTURE", purchase_units=[mutated_pu]), request_id="pp-req-fixed-001")
+            client.create_order(
+                OrderRequest(intent="CAPTURE", purchase_units=[mutated_pu]),
+                request_id="pp-req-fixed-001",
+            )
 
     def test_04_paypal_webhook_cryptographic_verification(self) -> None:
-        client = APIMaticPayPalClient(webhook_secret="whsec_test_key_2026")
+        client = APIMaticPayPalClient(webhook_secret="whsec_test_key_2026", mode="deterministic_sandbox")
         tx_id = "69cd13f0-d67a-11ef-9912-09a781b2"
         tx_time = "2026-11-10T02:35:10Z"
         wh_id = "WH-2WR32451HC0233532-67976317FL4543714"
@@ -108,7 +117,7 @@ class TestPayPulseAgenticTreasury(unittest.TestCase):
         self.assertEqual(tampered["verification_status"], "FAILURE")
 
     def test_05_channel3_catalog_ranking_and_unit_economics(self) -> None:
-        treasury = PayPulseAgenticTreasury()
+        treasury = PayPulseAgenticTreasury(APIMaticPayPalClient(mode="deterministic_sandbox"))
         quotes = treasury.channel3.search_and_rank_quotes(query="H100", quantity=10)
         self.assertEqual(len(quotes), 2)
         top = quotes[0]
@@ -119,7 +128,7 @@ class TestPayPulseAgenticTreasury(unittest.TestCase):
         self.assertGreater(top["channel3_utility_score"], quotes[1]["channel3_utility_score"])
 
     def test_06_autonomous_procure_3way_match_and_capture(self) -> None:
-        treasury = PayPulseAgenticTreasury()
+        treasury = PayPulseAgenticTreasury(APIMaticPayPalClient(mode="deterministic_sandbox"))
         result = treasury.autonomous_procure(query="H100", quantity=10, auto_capture_if_matched=True)
 
         self.assertEqual(result["paypal_order"]["status"], "COMPLETED")
@@ -137,7 +146,7 @@ class TestPayPulseAgenticTreasury(unittest.TestCase):
         self.assertEqual(sched["critical_path_days"], 6)
 
     def test_07_autonomous_procure_dispute_hold_freezes_escrow(self) -> None:
-        treasury = PayPulseAgenticTreasury()
+        treasury = PayPulseAgenticTreasury(APIMaticPayPalClient(mode="deterministic_sandbox"))
         result = treasury.autonomous_procure(
             query="Telemetry Gateway",
             quantity=10,
@@ -156,7 +165,7 @@ class TestPayPulseAgenticTreasury(unittest.TestCase):
         self.assertAlmostEqual(ag_state["kpis"]["disputed_volume_protected_usd"], 4150.00)
 
     def test_08_agentic_tool_dispatcher_and_payout_batch(self) -> None:
-        treasury = PayPulseAgenticTreasury()
+        treasury = PayPulseAgenticTreasury(APIMaticPayPalClient(mode="deterministic_sandbox"))
         schemas = treasury.get_agentic_tool_schemas()
         self.assertEqual(len(schemas), 3)
 
@@ -182,6 +191,100 @@ class TestPayPulseAgenticTreasury(unittest.TestCase):
         )
         self.assertEqual(payout_res["batch_header"]["batch_status"], "SUCCESS")
         self.assertEqual(payout_res["batch_header"]["amount"]["value"], "24310.20")
+
+    def test_09_live_http_transport_oauth2_and_orders_v2(self) -> None:
+        recorded_calls: List[Tuple[str, str, Dict[str, str], Optional[bytes]]] = []
+
+        def fake_paypal_http(
+            method: str, url: str, headers: Dict[str, str], body: Optional[bytes]
+        ) -> Tuple[int, Dict[str, Any]]:
+            recorded_calls.append((method, url, dict(headers), body))
+            if url.endswith("/v1/oauth2/token"):
+                expected_basic = base64.b64encode(b"live_cid:live_sec").decode("ascii")
+                self.assertEqual(headers["Authorization"], f"Basic {expected_basic}")
+                self.assertEqual(body, b"grant_type=client_credentials")
+                return 200, {"access_token": "A21AA_LIVE_SANDBOX_TOKEN_777", "expires_in": 32400}
+            if url.endswith("/v2/checkout/orders"):
+                self.assertEqual(headers["Authorization"], "Bearer A21AA_LIVE_SANDBOX_TOKEN_777")
+                self.assertTrue(headers["PayPal-Request-Id"].startswith("pp-req-"))
+                parsed = json.loads((body or b"{}").decode("utf-8"))
+                self.assertEqual(parsed["intent"], "CAPTURE")
+                return 201, {"id": "5O190127TN364715T", "status": "CREATED", "intent": "CAPTURE"}
+            if url.endswith("/v2/checkout/orders/5O190127TN364715T/capture"):
+                return 201, {
+                    "id": "5O190127TN364715T",
+                    "status": "COMPLETED",
+                    "purchase_units": [{"payments": {"captures": [{"id": "2GG279541U471931P"}]}}],
+                }
+            raise AssertionError(f"Unexpected URL: {url}")
+
+        client = APIMaticPayPalClient(
+            client_id="live_cid",
+            client_secret="live_sec",
+            environment="sandbox",
+            mode="live",
+            http_transport=fake_paypal_http,
+        )
+        self.assertEqual(client.transport_mode, "live_paypal_rest")
+
+        item = OrderItem("800G Optic", "PHX-800G", 1, Money("USD", "680.00"))
+        pu = PurchaseUnitRequest("REF-LIVE", "Live Sandbox Test", Money("USD", "680.00"), "C1", "INV-LIVE-1", [item])
+        created = client.create_order(OrderRequest(intent="CAPTURE", purchase_units=[pu]))
+        self.assertEqual(created["id"], "5O190127TN364715T")
+        self.assertEqual(created["transport_mode"], "live_paypal_rest")
+
+        captured = client.capture_order("5O190127TN364715T")
+        self.assertEqual(captured["status"], "COMPLETED")
+        self.assertEqual(captured["capture_id"], "2GG279541U471931P")
+        # OAuth2 token was fetched once and reused across create_order + capture_order
+        self.assertEqual(len(recorded_calls), 3)
+
+    def test_10_retry_policy_recovers_from_transient_errors_and_fails_fast_on_422(self) -> None:
+        delays: List[float] = []
+        policy = RetryPolicy(max_retries=3, backoff_factor=0.25, sleeper=delays.append)
+
+        responses = [(429, {"message": "RATE_LIMIT_REACHED"}), (503, {"message": "SERVICE_UNAVAILABLE"}), (201, {"id": "OK-1"})]
+        idx = [0]
+
+        def flaky_op() -> Tuple[int, Dict[str, Any]]:
+            res = responses[idx[0]]
+            idx[0] += 1
+            return res
+
+        status, payload, attempts = policy.execute(flaky_op)
+        self.assertEqual(status, 201)
+        self.assertEqual(payload["id"], "OK-1")
+        self.assertEqual(attempts, 3)
+        self.assertEqual(delays, [0.25, 0.5])
+
+        # Non-retryable 422 fails immediately on attempt 1 without sleeping
+        delays.clear()
+        with self.assertRaises(APIMaticHTTPError) as ctx:
+            policy.execute(lambda: (422, {"message": "UNPROCESSABLE_ENTITY"}))
+        self.assertEqual(ctx.exception.status_code, 422)
+        self.assertEqual(delays, [])
+
+    def test_11_canonical_json_fingerprint_order_independence(self) -> None:
+        a = {"b": 2, "a": {"z": [1, 2], "y": "usd"}}
+        b = {"a": {"y": "usd", "z": [1, 2]}, "b": 2}
+        self.assertEqual(canonical_json_fingerprint(a), canonical_json_fingerprint(b))
+
+    def test_12_bryntum_project_model_json_export_schema(self) -> None:
+        treasury = PayPulseAgenticTreasury(APIMaticPayPalClient(mode="deterministic_sandbox"))
+        treasury.autonomous_procure(query="800G", quantity=10)
+        model = treasury.bryntum.export_bryntum_project_model()
+        self.assertEqual(model["project"]["calendar"], "general")
+        self.assertEqual(len(model["tasks"]["rows"]), 3)
+        self.assertEqual(len(model["dependencies"]["rows"]), 2)
+        self.assertEqual(model["dependencies"]["rows"][0]["type"], "FinishToStart")
+        self.assertGreater(model["treasury_summary"]["total_committed_liquidity_usd"], 0)
+
+    def test_13_cli_demo_end_to_end(self) -> None:
+        summary = run_cli_demo(mode="deterministic_sandbox")
+        self.assertEqual(summary["transport_mode"], "deterministic_sandbox")
+        self.assertEqual(summary["matched_procurement"]["status"], "COMPLETED")
+        self.assertEqual(summary["dispute_hold_procurement"]["reconciliation_status"], "DISPUTE_HOLD")
+        self.assertEqual(summary["ag_grid_kpis"]["total_transactions"], 2)
 
 
 if __name__ == "__main__":

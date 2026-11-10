@@ -322,7 +322,7 @@ class BryntumSettlementScheduler:
 
 class AGGridLedgerReconciler:
     """
-    AG Grid Enterprise Financial Ledger & 3-Way Match Dispute Resolution Engine.
+    AG Grid v31 Financial Ledger & 3-Way Match Dispute Resolution Engine.
     Reconciles Channel3 Purchase Orders against Supplier Invoices and PayPal Orders/Captures.
     Automatically places transactions with > 1.5% variance into `DISPUTE_HOLD`.
     """
@@ -595,3 +595,78 @@ class PayPulseAgenticTreasury:
             )
             return self.sdk.create_payout_batch(batch_req)
         raise ValueError(f"Unsupported PayPulse agentic tool: '{tool_name}'")
+
+
+def run_cli_demo(mode: str = "auto") -> Dict[str, Any]:
+    """
+    Runs a complete reproducible PayPulse demonstration across Channel3 quote ranking,
+    APIMatic PayPal Orders v2 / Invoicing v2 / Payouts v1, AG Grid 3-Way Match ledger
+    reconciliation (both matched auto-capture and inflated-invoice dispute freeze),
+    and Bryntum Gantt `ProjectModel` JSON export.
+    """
+    client = APIMaticPayPalClient(mode=mode)
+    treasury = PayPulseAgenticTreasury(sdk_client=client)
+
+    matched_flow = treasury.autonomous_procure(query="H100", quantity=10, auto_capture_if_matched=True)
+    dispute_flow = treasury.autonomous_procure(
+        query="Telemetry Gateway",
+        quantity=10,
+        simulated_vendor_invoice_usd=4150.00,
+        auto_capture_if_matched=True,
+    )
+    payout_flow = treasury.execute_agent_tool(
+        "paypal_execute_vendor_payout_batch",
+        {
+            "batch_id": "BATCH-PAYPULSE-DEMO-01",
+            "payouts": [
+                {
+                    "receiver": "settlements@siliconcloud.io",
+                    "amount": "18190.20",
+                    "sender_item_id": "ITEM-M3-01",
+                    "note": "70% Escrow Milestone Release",
+                }
+            ],
+        },
+    )
+    return {
+        "transport_mode": client.transport_mode,
+        "environment": client.environment,
+        "matched_procurement": {
+            "order_id": matched_flow["paypal_order"]["id"],
+            "status": matched_flow["paypal_order"]["status"],
+            "reconciliation_status": matched_flow["ag_grid_ledger_entry"]["reconciliation_status"],
+            "negotiated_savings_usd": matched_flow["selected_channel3_quote"]["negotiated_savings_usd"],
+        },
+        "dispute_hold_procurement": {
+            "order_id": dispute_flow["paypal_order"]["id"],
+            "status": dispute_flow["paypal_order"]["status"],
+            "reconciliation_status": dispute_flow["ag_grid_ledger_entry"]["reconciliation_status"],
+            "variance_pct": dispute_flow["ag_grid_ledger_entry"]["variance_pct"],
+        },
+        "payout_batch": payout_flow["batch_header"],
+        "ag_grid_kpis": treasury.ag_grid.export_ag_grid_state()["kpis"],
+        "bryntum_project_model": treasury.bryntum.export_bryntum_project_model(),
+    }
+
+
+if __name__ == "__main__":
+    import argparse
+    import json
+
+    parser = argparse.ArgumentParser(description="PayPulse Agentic Treasury CLI Demo")
+    parser.add_argument(
+        "--mode",
+        choices=["auto", "live", "deterministic_sandbox"],
+        default="auto",
+        help="Transport mode ('auto' uses live PayPal REST if PAYPAL_CLIENT_ID/SECRET are set)",
+    )
+    parser.add_argument(
+        "--export-bryntum-only",
+        action="store_true",
+        help="Print only the Bryntum Gantt ProjectModel JSON",
+    )
+    args = parser.parse_args()
+    summary = run_cli_demo(mode=args.mode)
+    output = summary["bryntum_project_model"] if args.export_bryntum_only else summary
+    print(json.dumps(output, indent=2))
+
